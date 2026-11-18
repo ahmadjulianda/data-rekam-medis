@@ -6,6 +6,18 @@ Hasil build berupa file statis yang siap di-upload ke **cPanel**.
 
 ---
 
+## Status lingkungan saat ini
+
+Project Supabase sudah dibuat dan migrasi sudah diterapkan:
+
+- **Project:** `data-rekam-medis` (`mhetpydidthwthjwpzgz`), region `ap-southeast-1` (Singapore)
+- **URL:** `https://mhetpydidthwthjwpzgz.supabase.co`
+- `.env.local` sudah berisi URL dan **publishable key** (bukan service role key)
+- Tabel, RLS, policy RBAC, fungsi, dan bucket Storage sudah terverifikasi aktif
+
+Belum ada akun staf — buat akun pertama lewat **Authentication → Invite user** di Supabase Dashboard,
+lalu set perannya menjadi `admin` (lihat bagian 2).
+
 ## 1. Menjalankan proyek
 
 ```bash

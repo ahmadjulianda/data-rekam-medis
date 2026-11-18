@@ -93,7 +93,7 @@ as $$
   select role from public.profiles where id = auth.uid();
 $$;
 
-revoke all on function public.current_role() from public;
+revoke all on function public.current_role() from public, anon;
 grant execute on function public.current_role() to authenticated;
 
 -- Nomor rekam medis: RM-<tahun>-<4 digit>, dibuat atomik oleh database.
@@ -109,7 +109,7 @@ as $$
                 lpad(nextval('public.medical_record_number_seq')::text, 4, '0'));
 $$;
 
-revoke all on function public.generate_medical_record_number() from public;
+revoke all on function public.generate_medical_record_number() from public, anon;
 grant execute on function public.generate_medical_record_number() to authenticated;
 
 -- Data alergi pasien untuk apoteker (hanya kolom yang dibutuhkan).
@@ -125,7 +125,7 @@ as $$
   where public.current_role() in ('pharmacist', 'doctor', 'admin', 'nurse');
 $$;
 
-revoke all on function public.pharmacist_patient_allergies() from public;
+revoke all on function public.pharmacist_patient_allergies() from public, anon;
 grant execute on function public.pharmacist_patient_allergies() to authenticated;
 
 -- Resep beserta konteks minimum yang dibutuhkan apoteker (tanpa akses ke SOAP).
@@ -156,7 +156,7 @@ as $$
   where public.current_role() in ('pharmacist', 'doctor', 'admin', 'nurse');
 $$;
 
-revoke all on function public.pharmacist_prescriptions() from public;
+revoke all on function public.pharmacist_prescriptions() from public, anon;
 grant execute on function public.pharmacist_prescriptions() to authenticated;
 
 create or replace function public.touch_updated_at()
@@ -193,6 +193,9 @@ begin
   return new;
 end;
 $$;
+
+-- Fungsi trigger hanya dipanggil oleh database, bukan lewat API /rpc.
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
