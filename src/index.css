@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Frame berwarna blue-grey rendah kroma, diambil dari dunia klinik.
+     Sheet tetap putih — satu tone step, tanpa bayangan saat diam. */
+  --frame: 244 247 248;
+  --surface: 255 255 255;
+  --raised: 244 246 248;
+  --active: 235 237 238;
+  --border: 232 234 236;
+  --rule: 240 241 242;
+  --control: 205 206 209;
+  --ink: 19 20 22;
+  --muted: 93 95 96;
+  --accent: 27 108 128;
+  --positive: 30 123 79;
+  --negative: 196 36 42;
+  --warning: 146 64 14;
+
+  color-scheme: light;
+  font-family: 'IBM Plex Sans', Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: rgb(var(--frame));
+  color: rgb(var(--ink));
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.16);
+  color: rgb(var(--ink));
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+}
+
+/* Tabel dan angka memakai digit tabular agar tidak bergeser saat berubah. */
+table,
+.tabular-nums,
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Input tanggal mengikuti font aplikasi. */
+input[type='date'],
+input[type='datetime-local'] {
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
