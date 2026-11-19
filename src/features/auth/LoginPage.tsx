@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ArrowRight, LockKeyhole } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -149,7 +149,15 @@ export function LoginPage() {
             </form>
           )}
 
-          <p className="mt-6 text-small text-muted">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-small">
+            <Link to="/forgot-password" className="font-medium text-accent hover:underline">
+              Lupa kata sandi?
+            </Link>
+            <Link to="/register" className="font-medium text-muted hover:text-ink hover:underline">
+              Daftar akun baru
+            </Link>
+          </div>
+          <p className="mt-4 text-small text-muted">
             Akses aplikasi dibatasi oleh Row Level Security. Jangan bagikan akun Anda.
           </p>
         </div>

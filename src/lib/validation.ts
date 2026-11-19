@@ -56,7 +56,37 @@ export const loginSchema = z.object({
   password: z.string().min(6, 'Kata sandi minimal 6 karakter'),
 })
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email('Format email tidak valid'),
+})
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, 'Kata sandi minimal 6 karakter'),
+    confirmPassword: z.string().min(6, 'Konfirmasi kata sandi minimal 6 karakter'),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: 'Konfirmasi kata sandi tidak sama',
+    path: ['confirmPassword'],
+  })
+
+export const registerSchema = z
+  .object({
+    full_name: z.string().trim().min(3, 'Nama minimal 3 karakter').max(120, 'Nama terlalu panjang'),
+    email: z.string().trim().email('Format email tidak valid'),
+    password: z.string().min(6, 'Kata sandi minimal 6 karakter'),
+    confirmPassword: z.string().min(6, 'Konfirmasi kata sandi minimal 6 karakter'),
+    role: z.enum(['doctor', 'nurse', 'pharmacist']).default('nurse'),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: 'Konfirmasi kata sandi tidak sama',
+    path: ['confirmPassword'],
+  })
+
 export type PatientFormValues = z.infer<typeof patientSchema>
 export type MedicalRecordFormValues = z.infer<typeof medicalRecordSchema>
 export type PrescriptionFormValues = z.infer<typeof prescriptionSchema>
 export type LoginFormValues = z.infer<typeof loginSchema>
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
+export type RegisterFormValues = z.infer<typeof registerSchema>

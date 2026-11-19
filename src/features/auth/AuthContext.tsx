@@ -26,6 +26,9 @@ interface AuthContextValue {
   isLoading: boolean
   isDemo: boolean
   signIn: (email: string, password: string, role?: UserRole) => Promise<void>
+  signUp: (email: string, password: string, fullName: string, role: UserRole) => Promise<void>
+  requestPasswordReset: (email: string) => Promise<void>
+  updatePassword: (password: string) => Promise<void>
   signOut: () => Promise<void>
   refresh: () => Promise<void>
 }
@@ -138,6 +141,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [resolveUser],
   )
 
+  const signUp = useCallback(
+    async (email: string, password: string, fullName: string, role: UserRole) => {
+      if (isDemoMode) {
+        throw new Error('Pendaftaran akun memerlukan Supabase. Isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env.local.')
+      }
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName, role } },
+      })
+      if (error) {
+        if (error.message.toLowerCase().includes('already registered')) {
+          throw new Error('Email sudah terdaftar. Silakan masuk atau gunakan fitur lupa kata sandi.')
+        }
+        throw new Error(error.message)
+      }
+    },
+    [],
+  )
+
+  const requestPasswordReset = useCallback(async (email: string) => {
+    if (isDemoMode) {
+      throw new Error('Reset kata sandi memerlukan Supabase. Isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env.local.')
+    }
+    const redirectTo = `${window.location.origin}/reset-password`
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    if (error) throw new Error(error.message)
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    if (isDemoMode) {
+      throw new Error('Pengubahan kata sandi memerlukan Supabase.')
+    }
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw new Error(error.message)
+  }, [])
+
   const signOut = useCallback(async () => {
     if (isDemoMode) {
       window.localStorage.removeItem(DEMO_SESSION_KEY)
@@ -156,8 +196,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, resolveUser])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isLoading, isDemo: isDemoMode, signIn, signOut, refresh }),
-    [user, isLoading, signIn, signOut, refresh],
+    () => ({
+      user,
+      isLoading,
+      isDemo: isDemoMode,
+      signIn,
+      signUp,
+      requestPasswordReset,
+      updatePassword,
+      signOut,
+      refresh,
+    }),
+    [user, isLoading, signIn, signUp, requestPasswordReset, updatePassword, signOut, refresh],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

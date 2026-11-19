@@ -15,8 +15,10 @@ Project Supabase sudah dibuat dan migrasi sudah diterapkan:
 - `.env.local` sudah berisi URL dan **publishable key** (bukan service role key)
 - Tabel, RLS, policy RBAC, fungsi, dan bucket Storage sudah terverifikasi aktif
 
-Belum ada akun staf — buat akun pertama lewat **Authentication → Invite user** di Supabase Dashboard,
-lalu set perannya menjadi `admin` (lihat bagian 2).
+Akun admin pertama sudah dibuat (`ahmadjulianda@gmail.com`, peran `admin`). Kata sandi awal
+disetel sementara ke `TempPass123!` — **ganti segera** lewat fitur *Lupa kata sandi* atau
+*Profil saya*. Buat akun staf tambahan lewat halaman **Daftar akun baru** (peran default
+`nurse`) atau undangan Supabase Dashboard.
 
 ## 1. Menjalankan proyek
 
@@ -76,6 +78,11 @@ dikonfigurasi.
 
 > **Jangan pernah** menaruh `service_role` key di kode frontend atau di file yang di-upload ke
 > cPanel. Hanya dua variabel `VITE_` di atas yang boleh diekspos ke browser.
+>
+> **Redirect URL (wajib untuk fitur *Lupa kata sandi*):** di *Supabase → Authentication → URL
+> Configuration → Redirect URLs*, tambahkan `http://localhost:5173/reset-password` dan URL
+> produksi Anda (mis. `https://domain-anda.com/reset-password`). Tanpa ini, tautan reset di email
+> tidak bisa membuka halaman pengubahan kata sandi.
 
 ### Ringkasan hak akses (RLS)
 
@@ -138,7 +145,7 @@ src/
 │   ├── layout/       # Sidebar, Topbar, AppLayout, ProtectedRoute, RoleGuard
 │   └── ui/           # Button, Field, Modal, Tabs, Avatar, Feedback
 ├── features/
-│   ├── auth/         # AuthContext, LoginPage
+│   ├── auth/         # AuthContext, LoginPage, ForgotPasswordPage, ResetPasswordPage, RegisterPage
 │   ├── dashboard/    # Ringkasan klinik
 │   ├── patients/     # Daftar, detail, form pasien
 │   ├── medical-records/ # SOAP, daftar, detail, arsip
