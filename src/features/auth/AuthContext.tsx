@@ -27,6 +27,7 @@ interface AuthContextValue {
   isDemo: boolean
   signIn: (email: string, password: string, role?: UserRole) => Promise<void>
   signUp: (email: string, password: string, fullName: string, role: UserRole) => Promise<void>
+  resendConfirmation: (email: string) => Promise<void>
   requestPasswordReset: (email: string) => Promise<void>
   updatePassword: (password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -132,7 +133,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        if (error.message.toLowerCase().includes('invalid login')) {
+        const message = error.message.toLowerCase()
+        if (message.includes('email not confirmed') || message.includes('not confirmed')) {
+          throw new Error('Email belum dikonfirmasi. Periksa kotak masuk (dan folder spam) untuk tautan konfirmasi, atau kirim ulang email konfirmasi.')
+        }
+        if (message.includes('invalid login')) {
           throw new Error('Email atau kata sandi salah.')
         }
         throw new Error(error.message)
@@ -160,6 +165,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [],
   )
+
+  const resendConfirmation = useCallback(async (email: string) => {
+    if (isDemoMode) {
+      throw new Error('Konfirmasi email memerlukan Supabase.')
+    }
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
+    if (error) throw new Error(error.message)
+  }, [])
 
   const requestPasswordReset = useCallback(async (email: string) => {
     if (isDemoMode) {
@@ -202,12 +215,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isDemo: isDemoMode,
       signIn,
       signUp,
+      resendConfirmation,
       requestPasswordReset,
       updatePassword,
       signOut,
       refresh,
     }),
-    [user, isLoading, signIn, signUp, requestPasswordReset, updatePassword, signOut, refresh],
+    [user, isLoading, signIn, signUp, resendConfirmation, requestPasswordReset, updatePassword, signOut, refresh],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

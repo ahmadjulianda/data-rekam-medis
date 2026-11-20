@@ -13,11 +13,14 @@ import { loginSchema, type LoginFormValues } from '../../lib/validation'
 import type { UserRole } from '../../types'
 
 export function LoginPage() {
-  const { user, isLoading, isDemo, signIn } = useAuth()
+  const { user, isLoading, isDemo, signIn, resendConfirmation } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [demoEmail, setDemoEmail] = useState(DEMO_ACCOUNTS[1].email)
   const [submitting, setSubmitting] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [resending, setResending] = useState(false)
+  const [resendDone, setResendDone] = useState(false)
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,6 +34,8 @@ export function LoginPage() {
 
   async function submit(values: LoginFormValues) {
     setSubmitting(true)
+    setLoginError(null)
+    setResendDone(false)
     try {
       if (isDemo) {
         const account = DEMO_ACCOUNTS.find((item) => item.email === values.email)
@@ -41,9 +46,29 @@ export function LoginPage() {
       toast.success('Berhasil masuk')
       navigate(from, { replace: true })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Gagal masuk.')
+      const message = error instanceof Error ? error.message : 'Gagal masuk.'
+      setLoginError(message)
+      toast.error(message)
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleResend() {
+    const email = form.getValues('email')
+    if (!email) {
+      toast.error('Masukkan email terlebih dahulu.')
+      return
+    }
+    setResending(true)
+    try {
+      await resendConfirmation(email)
+      setResendDone(true)
+      toast.success('Email konfirmasi telah dikirim ulang.')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Gagal mengirim ulang konfirmasi.')
+    } finally {
+      setResending(false)
     }
   }
 
@@ -149,6 +174,25 @@ export function LoginPage() {
             </form>
           )}
 
+          {!isDemo && loginError && loginError.toLowerCase().includes('konfirmasi') && (
+            <div className="mt-4 rounded-card border border-line bg-raised px-4 py-3 text-small text-muted">
+              {resendDone ? (
+                <p className="text-ink">Email konfirmasi telah dikirim ulang. Periksa kotak masuk (dan folder spam) Anda.</p>
+              ) : (
+                <>
+                  <p>Belum menerima email konfirmasi?</p>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="mt-1 font-medium text-accent hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {resending ? 'Mengirim...' : 'Kirim ulang email konfirmasi'}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
           <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-small">
             <Link to="/forgot-password" className="font-medium text-accent hover:underline">
               Lupa kata sandi?
